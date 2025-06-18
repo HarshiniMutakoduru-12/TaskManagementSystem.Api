@@ -47,12 +47,43 @@ namespace TaskManagementSystem.Application.Services
             await _toDoTaskRepository.AddAsync(projects);
             return ApiErrorCodeMessages.TaskAddedSuccessfully;
         }
+        // Update ToDo Task
+        public async Task<string> UpdateTaskAsync(int taskId, UpdateTaskRequestDto taskRequest)
+        {
+            var task = await _toDoTaskRepository.GetByIdAsync(taskId) ?? throw new AppException(ApiErrorCodeMessages.TaskNotFound);
+            task.UpdatedOn = DateTime.UtcNow;
+            task.UpdatedBy = "1";
+            task.UserId = taskRequest.UserId ?? task.UserId;
+            task.ProjectId = taskRequest.ProjectId ?? task.ProjectId;
+            task.Title = taskRequest.Title ?? task.Title;
+            task.Description = taskRequest.Description ?? task.Description;
+            task.DueDate = taskRequest.DueDate ?? task.DueDate;
+            task.Priority = taskRequest.Priority ?? task.Priority;
+            task.IsCompleted = taskRequest.IsCompleted ?? task.IsCompleted;           
+            task.UpdatedOn = DateTime.UtcNow;
+            await _toDoTaskRepository.UpdateAsync(task);
+            return ApiErrorCodeMessages.TaskUpdatedSuccessfully;
+        }
 
         // Get All ToDo Tasks
-        public async Task<List<AddTaskResponseDto>> GetAllTasksAsync()
+        public async Task<List<AddTaskResponseDto>> GetAllTasksAsync(int? userId, int?projectId, bool? isCompleted)
         {
-            var tasks = await _toDoTaskRepository.GetAll().ToListAsync();
-            return _mapper.Map<List<AddTaskResponseDto>>(tasks);
+            var tasksQuery =  _toDoTaskRepository.GetAll();
+            if (userId.HasValue)
+            {
+                tasksQuery = tasksQuery.Where(task => task.UserId == userId.Value);
+            }
+            
+            if (isCompleted.HasValue)
+            {
+                tasksQuery = tasksQuery.Where(task => task.IsCompleted == isCompleted.Value);
+            }
+           
+            if (projectId.HasValue)
+            {
+                tasksQuery = tasksQuery.Where(task => task.ProjectId == projectId.Value);
+            }
+            return _mapper.Map<List<AddTaskResponseDto>>(tasksQuery);
         }
 
         public async Task<GetTaskByProjectIdResponse> GetTaskByProjectIdAsync(int projectId)
@@ -112,6 +143,7 @@ namespace TaskManagementSystem.Application.Services
         }
 
 
+
         public async Task<List<TaskAssignedToUserResponseDto>> GetOverdueOrIncompleteTasksByUserIdAsync(int userId)
         {
             var user = await _userRepository.GetByIdAsync(userId) ?? throw new AppException(ApiErrorCodeMessages.UserNotFound);
@@ -137,18 +169,18 @@ namespace TaskManagementSystem.Application.Services
 
 
 
-        public async Task<UserCompletedTaskCountRespDto> GetCompletedTaskCountByUserAsync(int userId)
-        {    
-            var user = await _userRepository.GetByIdAsync(userId) ?? throw new AppException(ApiErrorCodeMessages.UserNotFound);
-            var tasks = await _toDoTaskRepository.GetAll()
-                .Where(task => task.IsCompleted && task.UserId == userId)  
-                .ToListAsync();          
+        //public async Task<UserCompletedTaskCountRespDto> GetCompletedTaskCountByUserAsync(int userId)
+        //{    
+        //    var user = await _userRepository.GetByIdAsync(userId) ?? throw new AppException(ApiErrorCodeMessages.UserNotFound);
+        //    var tasks = await _toDoTaskRepository.GetAll()
+        //        .Where(task => task.IsCompleted && task.UserId == userId)  
+        //        .ToListAsync();          
 
 
-            var completedTaskCounts = new UserCompletedTaskCountRespDto { UserId = userId, CompletedTaskCount= tasks.Count};
+        //    var completedTaskCounts = new UserCompletedTaskCountRespDto { UserId = userId, CompletedTaskCount= tasks.Count};
 
-            return completedTaskCounts;
-        }
+        //    return completedTaskCounts;
+        //}
 
 
 
@@ -160,6 +192,27 @@ namespace TaskManagementSystem.Application.Services
             var allTasks =  _mapper.Map<List<AddTaskResponseDto>>(tasks);
 
             return allTasks;
+        }
+        public async Task<UserCompletedTaskCountRespDto> GetTaskCountsAsync()
+        {
+                       
+            var tasks = await _toDoTaskRepository.GetAll()               
+                .ToListAsync();
+
+         
+            var totalTaskCount = tasks.Count;
+            var completedTaskCount = tasks.Count(task => task.IsCompleted);
+            var overdueTaskCount = tasks.Count(task => task.DueDate < DateTime.UtcNow && !task.IsCompleted);
+
+            // Create the response DTO
+            var taskCounts = new UserCompletedTaskCountRespDto
+            {                
+                TotalTaskCount = totalTaskCount,
+                CompletedTaskCount = completedTaskCount,
+                OverdueTaskCount = overdueTaskCount
+            };
+
+            return taskCounts;
         }
 
 

@@ -7,8 +7,9 @@ using System.Threading.Tasks;
 namespace TaskManagementSystem.Common.DTOs.ResponseDTO
 {
     public class UserCompletedTaskCountRespDto
-    {
-        public int UserId { get; set; } 
+    {               
+        public int TotalTaskCount { get; set; }
         public int CompletedTaskCount { get; set; }
+        public int OverdueTaskCount { get; set; }
     }
 }

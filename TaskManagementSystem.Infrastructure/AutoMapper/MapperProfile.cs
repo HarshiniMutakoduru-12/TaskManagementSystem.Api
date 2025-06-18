@@ -29,7 +29,7 @@ namespace TaskManagementSystem.Infrastructure.AutoMapper
 
             CreateMap<TaskAssignedToUserResponseDto, ToDoTask>()
                 .ReverseMap();
-
+            CreateMap<UpdateTaskRequestDto, ToDoTask>().ReverseMap();
             //CreateMap<, UserCompletedTaskCountRespDto>()
             //.ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.UserId))
             //.ForMember(dest => dest.CompletedTaskCount, opt => opt.MapFrom(src => src.CompletedTaskCount));
