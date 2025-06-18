@@ -1,0 +1,150 @@
+﻿@page "/tasks"
+@using TaskManagementSystem.UI.Models
+@using TaskManagementSystem.UI.Services
+@inject ISnackbar Snackbar
+@inject NavigationManager NavigationManager
+@inject ITaskService TaskService
+@layout MainLayout
+
+<MudContainer>
+    <MudToolBar Class="mb-4">
+        <div class="row d-flex justify-content-between w-100">
+            <div class="ms-auto" style="margin-right: -42px">
+                <MudButton Variant="Variant.Filled" Style="background-color:#4caf50;color:white" @onclick="OpenCreateTask">Create Task</MudButton>
+            </div>
+        </div>
+    </MudToolBar>
+
+    <MudStack Spacing="2">
+        <MudButton OnClick="ToggleFilter" Color="Color.Secondary">
+            @(showFilter ? "Hide Filter" : "Show Filter")
+            <MudIcon Icon="@Icons.Material.Outlined.FilterAlt" />
+        </MudButton>
+        <MudDivider />
+        <MudCollapse Expanded="showFilter">
+            <div class="row">
+                <div class="col-3">
+                    <MudTextField Label="Title" @bind-Value="filter.TitleFilter" Placeholder="Search Title" />
+                </div>
+                <div class="col-3">
+                    <MudSelect T="bool?" Label="Status" @bind-Value="filter.IsCompleted">
+                        <MudSelectItem T="bool?" Value="@(null)">All</MudSelectItem>
+                        <MudSelectItem T="bool?" Value="false">In Progress</MudSelectItem>
+                        <MudSelectItem T="bool?" Value="true">Completed</MudSelectItem>
+                    </MudSelect>
+                </div>
+                <div class="col-3">
+                    <MudDatePicker Label="Due Date" @bind-Date="filter.DueDateFilter" />
+                </div>
+                <div class="col-3 d-flex align-items-end">
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="ApplyFilter">Apply</MudButton>
+                    <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="ClearFilter" Class="ms-2">Clear</MudButton>
+                </div>
+            </div>
+        </MudCollapse>
+    </MudStack>
+
+    @if (tasks.Any())
+    {
+        <MudTable Items="@tasks" Hover="true" Class="mt-4">
+            <HeaderContent>
+                <MudTh>@nameof(AddTaskResponseDto.Title)</MudTh>
+                <MudTh>Status</MudTh>
+                <MudTh>@nameof(AddTaskResponseDto.Priority)</MudTh>
+                <MudTh>@nameof(AddTaskResponseDto.DueDate)</MudTh>
+                <MudTh>@nameof(AddTaskResponseDto.Description)</MudTh>
+                <MudTh>Actions</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd>@context.Title</MudTd>
+                <MudTd>
+                    <MudChip T="string" Color="@GetStatusColor(@context.IsCompleted ? "Completed" : "In Progress")">
+                        @(context.IsCompleted ? "Completed" : "In Progress")
+                    </MudChip>
+                </MudTd>
+                <MudTd>
+                    <MudChip T="string" Color="@GetPriorityColor(@context.Priority)">
+                        @context.Priority
+                    </MudChip>
+                </MudTd>
+                <MudTd>@context.DueDate.ToShortDateString()</MudTd>
+                <MudTd>@context.Description</MudTd>
+                <MudTd>
+                    <MudIconButton Icon="@Icons.Material.Outlined.Edit" Color="Color.Default" @onclick="@(() => EditTask(context.TaskId))" />
+                    <MudIconButton Icon="@Icons.Material.Outlined.RemoveRedEye" Color="Color.Success" @onclick="@(() => ViewTask(context.TaskId))" />
+                </MudTd>
+            </RowTemplate>
+        </MudTable>
+    }
+    else
+    {
+        <MudAlert Severity="Severity.Info" Class="mt-4">No tasks found.</MudAlert>
+    }
+</MudContainer>
+
+@code {
+    private List<AddTaskResponseDto> tasks = [];
+    private bool showFilter = false;
+
+    private TaskFilterRequestDto filter = new()
+    {
+        CurrentPage = 1,
+        PageSize = 10,
+        SortColumn = "TaskId",
+        IsAscending = true
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadTasks();
+    }
+
+    private async Task LoadTasks()
+    {
+        var response = await TaskService.SearchTasksAsync(filter);
+        tasks = response?.Response ?? [];
+    }
+
+    private async Task ApplyFilter()
+    {
+        filter.CurrentPage = 1;
+        await LoadTasks();
+        showFilter = false;
+    }
+
+    private async Task ClearFilter()
+    {
+        filter = new()
+        {
+            CurrentPage = 1,
+            PageSize = 10,
+            SortColumn = "TaskId",
+            IsAscending = true
+        };
+        await LoadTasks();
+    }
+
+    private void ToggleFilter() => showFilter = !showFilter;
+
+    private void OpenCreateTask() => NavigationManager.NavigateTo("/create");
+
+    private void EditTask(int id) => NavigationManager.NavigateTo($"/edit/{id}");
+
+    private void ViewTask(int id) => NavigationManager.NavigateTo($"/view/{id}");
+
+    private Color GetStatusColor(string status) => status switch
+    {
+        "Created" => Color.Info,
+        "InProgress" => Color.Warning,
+        "Completed" => Color.Success,
+        _ => Color.Default
+    };
+
+    private Color GetPriorityColor(string priority) => priority switch
+    {
+        "Low" => Color.Success,
+        "Medium" => Color.Warning,
+        "High" => Color.Error,
+        _ => Color.Default
+    };
+}

@@ -1,5 +1,31 @@
 ﻿@inherits LayoutComponentBase
-<div class="page">
+@using MudBlazor
+
+<MudThemeProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+<MudPopoverProvider />
+
+<MudLayout>
+    <MudAppBar Color="Color.Primary" Elevation="1">
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@ToggleDrawer" />
+        <MudSpacer />
+        <MudText Typo="Typo.h6">Task Management</MudText>
+    </MudAppBar>
+
+    <MudDrawer DrawerType="DrawerType.Left" @bind-Open="@_open" Elevation="1" OverlayAutoClose = "true" Overlay="true" >
+        <MudNavMenu>
+            <MudNavLink Href="/dashboard" Icon="@MudBlazor.Icons.Material.Filled.Dashboard">Dashboard</MudNavLink>
+            <MudNavLink Href="/tasks" Icon="@MudBlazor.Icons.Material.Filled.List">Tasks</MudNavLink>
+            <MudNavLink Href="/create" Icon="@MudBlazor.Icons.Material.Filled.Add">Create Task</MudNavLink>
+        </MudNavMenu>
+    </MudDrawer>
+
+    <MudMainContent>
+        @Body
+    </MudMainContent>
+</MudLayout>
+@* <div class="page">
     <div class="sidebar">
         <NavMenu />
     </div>
@@ -13,4 +39,30 @@
             @Body
         </article>
     </main>
-</div>
+</div> *@
+@* <MudLayout>
+    <MudAppBar Color="Color.Primary" Elevation="4">
+        <MudText Typo="Typo.h6">Task Management</MudText>
+    </MudAppBar>
+
+    <MudDrawer DrawerType="DrawerType.Left" Open="true" Elevation="1">
+        <MudNavMenu>
+            <MudNavLink Href="/dashboard" Icon="@Icons.Material.Filled.Dashboard">Dashboard</MudNavLink>
+            <MudNavLink Href="/tasks" Icon="@Icons.Material.Filled.List">Tasks</MudNavLink>
+            <MudNavLink Href="/create-task" Icon="@Icons.Material.Filled.Add">Create Task</MudNavLink>
+        </MudNavMenu>
+    </MudDrawer>
+
+    <MudMainContent>
+        @Body
+    </MudMainContent>
+</MudLayout>
+ *@
+@code {
+    private bool _open = false;
+
+    private void ToggleDrawer()
+    {
+        _open = !_open;
+    }
+}

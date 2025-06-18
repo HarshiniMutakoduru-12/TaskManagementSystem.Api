@@ -1,0 +1,96 @@
+﻿@page "/dashboard"
+@page "/"
+@using TaskManagementSystem.UI.Models
+@using TaskManagementSystem.UI.Services
+@inject ITaskService TaskService
+<MudPaper Class="pa-4">
+    <MudText Typo="Typo.h5">Dashboard</MudText>
+
+    <MudGrid Class="mt-4">
+        <MudItem xs="12" sm="4">
+            <MudCard Class="dashboard-card" Style="@GetCardStyle(0)" @onmouseover="() => CardHover(0, true)" @onmouseout="() => CardHover(0, false)">
+                <MudCardContent>
+                    <MudText Typo="Typo.h6">Total Tasks</MudText>
+                    <MudText>@TaskStats?.TotalTaskCount</MudText>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+        <MudItem xs="12" sm="4">
+            <MudCard Class="dashboard-card" Style="@GetCardStyle(1)" @onmouseover="() => CardHover(1, true)" @onmouseout="() => CardHover(1, false)">
+                <MudCardContent>
+                    <MudText Typo="Typo.h6">Completed</MudText>
+                    <MudText>@TaskStats?.CompletedTaskCount</MudText>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+        <MudItem xs="12" sm="4">
+            <MudCard Class="dashboard-card" Style="@GetCardStyle(2)" @onmouseover="() => CardHover(2, true)" @onmouseout="() => CardHover(2, false)">
+                <MudCardContent>
+                    <MudText Typo="Typo.h6">Overdue</MudText>
+                    <MudText>@TaskStats?.OverdueTaskCount</MudText>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+    </MudGrid>
+
+    <MudPaper Class="mt-6 pa-4" Style="background: #f5f5f5;">
+        <MudChart ChartType="ChartType.Pie"
+                  InputLabels="@Labels"
+                  InputData="@ChartData"
+                  Style="max-width: 400px; margin: auto;" />
+    </MudPaper>
+
+</MudPaper>
+
+@code {
+    private UserCompletedTaskCountRespDto? TaskStats;
+    private string[] Labels = { "Completed", "Overdue" };
+    private double[] ChartData = new double[2];
+    private string[] ChartColors = { "#4caf50", "#f44336" }; // Green for completed, red for overdue
+    private bool[] CardHovered = new bool[3];
+
+      protected override async Task OnInitializedAsync()
+    {
+        TaskStats = await TaskService.GetTaskCountsAsync();
+        if (TaskStats != null)
+        {
+            ChartData = new double[]
+            {
+                TaskStats.CompletedTaskCount,
+                TaskStats.OverdueTaskCount
+            };
+        }
+        // Mock data
+        // TaskStats = new UserCompletedTaskCountRespDto
+        // {
+        //     TotalTaskCount = 15,
+        //     CompletedTaskCount = 8,
+        //     OverdueTaskCount = 3
+        // };
+
+        // ChartData = new double[]
+        // {
+        //     TaskStats.CompletedTaskCount,
+        //     TaskStats.OverdueTaskCount
+        // };
+    }
+
+    private void CardHover(int index, bool hover)
+    {
+        CardHovered[index] = hover;
+        StateHasChanged();
+    }
+
+    private string GetCardStyle(int index)
+    {
+        string[] cardColors = { "#fffde7", "#e8f5e9", "#ffebee" }; // Light yellow, green, red
+        string[] hoverColors = { "#fff9c4", "#c8e6c9", "#ffcdd2" }; // Slightly deeper on hover
+
+        if (CardHovered[index])
+        {
+            // Slightly elevate and change background on hover
+            return $"box-shadow: 0 4px 20px rgba(0,0,0,0.15); background: {hoverColors[index]};";
+        }
+        return $"box-shadow: 0 1px 4px rgba(0,0,0,0.08); background: {cardColors[index]};";
+    }
+}

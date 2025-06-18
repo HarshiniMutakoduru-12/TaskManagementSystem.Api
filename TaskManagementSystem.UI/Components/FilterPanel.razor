@@ -1,0 +1,35 @@
+﻿@* @using MudBlazor
+<MudPaper Class="pa-4 mb-4" Elevation="1">
+    <MudSelect T="int?" Label="User" @bind-Value="_userId">
+        <MudSelectItem Value="null">All</MudSelectItem>
+        <MudSelectItem Value="1">User 1</MudSelectItem>
+        <MudSelectItem Value="2">User 2</MudSelectItem>
+    </MudSelect>
+
+    <MudSelect T="bool?" Label="Status" @bind-Value="_isCompleted">
+        <MudSelectItem Value="null">All</MudSelectItem>
+        <MudSelectItem Value="true">Completed</MudSelectItem>
+        <MudSelectItem Value="false">Pending</MudSelectItem>
+    </MudSelect>
+
+    <MudSelect T="int?" Label="Project" @bind-Value="_projectId">
+        <MudSelectItem Value="null">All</MudSelectItem>
+        <MudSelectItem Value="101">Project 101</MudSelectItem>
+    </MudSelect>
+
+    <MudButton OnClick="ApplyFilter">Apply</MudButton>
+</MudPaper>
+
+@code {
+    private int? _userId;
+    private bool? _isCompleted;
+    private int? _projectId;
+
+    [Parameter] public EventCallback<(int?, bool?, int?)> onFilter { get; set; }
+
+    private async Task ApplyFilter()
+    {
+        await onFilter.InvokeAsync((_userId, _isCompleted, _projectId));
+    }
+}
+ *@
