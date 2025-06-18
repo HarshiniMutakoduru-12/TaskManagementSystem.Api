@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using TaskManagementSystem.Api.Extensions;
+using TaskManagementSystem.Api.Middleware;
 using TaskManagementSystem.Application.IServices;
 using TaskManagementSystem.Application.Services;
 using TaskManagementSystem.Data.Database;
@@ -46,6 +47,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseMiddleware<ExceptionHandlingMiddleware>();
+
 
 app.UseAuthorization();
 
