@@ -112,6 +112,30 @@ namespace TaskManagementSystem.Application.Services
         }
 
 
+        public async Task<List<TaskAssignedToUserResponseDto>> GetOverdueOrIncompleteTasksByUserIdAsync(int userId)
+        {
+            var user = await _userRepository.GetByIdAsync(userId) ?? throw new AppException(ApiErrorCodeMessages.UserNotFound);
+            var currentDate = DateTime.Now;
+            var tasks = await _toDoTaskRepository.GetAll()
+                .Where(task => task.UserId == userId && ((task.DueDate < currentDate && !task.IsCompleted)
+                            || (!task.IsCompleted)))
+                .ToListAsync();
+            var allTasks = _mapper.Map<List<AddTaskResponseDto>>(tasks);
+
+            var groupedTasks = allTasks
+                .GroupBy(task => task.UserId)
+                .Select(userGroup => new TaskAssignedToUserResponseDto
+                {
+                    UserId = userGroup.Key,
+                    Tasks = userGroup.ToList()
+                })
+                .OrderBy(u => u.UserId)
+                .ToList();
+
+            return groupedTasks;
+        }
+
+
 
         public async Task<UserCompletedTaskCountRespDto> GetCompletedTaskCountByUserAsync(int userId)
         {    

@@ -18,6 +18,8 @@ namespace TaskManagementSystem.Application.IServices
         Task<UserCompletedTaskCountRespDto> GetCompletedTaskCountByUserAsync(int userId);
         Task<List<AddTaskResponseDto>> GetTasksDueThisWeekAsync();
         Task<GetTaskByProjectIdResponse> GetTaskByProjectIdAsync(int projectId);
+        Task<List<TaskAssignedToUserResponseDto>> GetOverdueOrIncompleteTasksByUserIdAsync(int userId);
+
 
     }
 }

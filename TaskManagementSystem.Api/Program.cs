@@ -141,7 +141,7 @@ void SeedData(ApplicationDbContext context)
             {
                 Title = "Design Homepage",
                 Description = "Create the homepage UI design.",
-                DueDate = DateTime.UtcNow.AddDays(3),
+                DueDate = DateTime.UtcNow.AddDays(-1),
                 Priority = "High",
                 IsCompleted = false,
                 UserId = 1,
@@ -163,6 +163,18 @@ void SeedData(ApplicationDbContext context)
             },
             new ToDoTask
             {
+                Title = "Task3",
+                Description = "Implement login functionality for the website.",
+                DueDate = DateTime.UtcNow.AddDays(-1),
+                Priority = "Medium",
+                IsCompleted = true,
+                UserId = 1,
+                CreatedOn = DateTime.UtcNow,
+                CreatedBy = "1",
+                ProjectId = 1
+            },
+            new ToDoTask
+            {
                 Title = "Create Project Dashboard",
                 Description = "Develop the project management dashboard.",
                 DueDate = DateTime.UtcNow.AddDays(7),
@@ -177,7 +189,7 @@ void SeedData(ApplicationDbContext context)
             {
                 Title = "API Integration",
                 Description = "Integrate external APIs for payment gateway.",
-                DueDate = DateTime.UtcNow.AddDays(10),
+                DueDate = DateTime.UtcNow.AddDays(-2),
                 Priority = "Low",
                 IsCompleted = false,
                 UserId = 2,
@@ -185,6 +197,18 @@ void SeedData(ApplicationDbContext context)
                 CreatedBy = "1",
                 ProjectId = 1
             },
+             new ToDoTask
+             {
+                 Title = "Task3",
+                 Description = "Integrate external APIs for payment gateway.",
+                 DueDate = DateTime.UtcNow.AddDays(-1),
+                 Priority = "Low",
+                 IsCompleted = true,
+                 UserId = 2,
+                 CreatedOn = DateTime.UtcNow,
+                 CreatedBy = "1",
+                 ProjectId = 1
+             },
             new ToDoTask
             {
                 Title = "Set Up Database Schema",
@@ -204,6 +228,18 @@ void SeedData(ApplicationDbContext context)
                 DueDate = DateTime.UtcNow.AddDays(6),
                 Priority = "High",
                 IsCompleted = false,
+                UserId = 3,
+                CreatedOn = DateTime.UtcNow,
+                CreatedBy = "1",
+                ProjectId = 2
+            },
+            new ToDoTask
+            {
+                Title = "Test User Authentication",
+                Description = "Perform tests on user login and authentication.",
+                DueDate = DateTime.UtcNow.AddDays(-2),
+                Priority = "High",
+                IsCompleted = true,
                 UserId = 3,
                 CreatedOn = DateTime.UtcNow,
                 CreatedBy = "1",
@@ -235,6 +271,18 @@ void SeedData(ApplicationDbContext context)
             },
             new ToDoTask
             {
+                Title = "Task4",
+                Description = "Design the page for listing products.",
+                DueDate = DateTime.UtcNow.AddDays(-4),
+                Priority = "Medium",
+                IsCompleted = false,
+                UserId = 4,
+                CreatedOn = DateTime.UtcNow,
+                CreatedBy = "1",
+                ProjectId = 3
+            },
+            new ToDoTask
+            {
                 Title = "Design E-Commerce Checkout",
                 Description = "Design the checkout page for the e-commerce app.",
                 DueDate = DateTime.UtcNow.AddDays(12),
@@ -247,12 +295,24 @@ void SeedData(ApplicationDbContext context)
             },
             new ToDoTask
             {
-                Title = "Payment Gateway Integration",
-                Description = "Integrate the Stripe payment gateway for payments.",
-                DueDate = DateTime.UtcNow.AddDays(14),
-                Priority = "High",
+                Title = "Task5",
+                Description = "Design the page for listing products.",
+                DueDate = DateTime.UtcNow.AddDays(-5),
+                Priority = "Medium",
                 IsCompleted = false,
                 UserId = 5,
+                CreatedOn = DateTime.UtcNow,
+                CreatedBy = "1",
+                ProjectId = 3
+            },
+            new ToDoTask
+            {
+                Title = "Design Product Listing Page",
+                Description = "Design the page for listing products.",
+                DueDate = DateTime.UtcNow.AddDays(-3),
+                Priority = "Medium",
+                IsCompleted = true,
+                UserId = 4,
                 CreatedOn = DateTime.UtcNow,
                 CreatedBy = "1",
                 ProjectId = 3

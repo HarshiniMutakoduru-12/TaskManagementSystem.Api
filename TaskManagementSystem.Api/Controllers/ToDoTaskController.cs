@@ -82,5 +82,13 @@ namespace TaskManagementSystem.Api.Controllers
             var tasks = await _toDoTaskService.GetTaskByProjectIdAsync(projectId);
             return Ok(new GenericResponses<GetTaskByProjectIdResponse>().SuccessResponse(tasks));
         }
+        [HttpGet]
+        [Route("GetOverdueOrIncompleteTasksByUserId/{userId}")]
+        [SwaggerResponse(StatusCodes.Status200OK, type: typeof(GenericResponses<List<TaskAssignedToUserResponseDto>>))]
+        public async Task<IActionResult> GetOverdueOrIncompleteTasksByUserId(int userId)
+        {
+            var tasks = await _toDoTaskService.GetOverdueOrIncompleteTasksByUserIdAsync(userId);
+            return Ok(new GenericResponses<List<TaskAssignedToUserResponseDto>>().SuccessResponse(tasks));
+        }
     }
 }
