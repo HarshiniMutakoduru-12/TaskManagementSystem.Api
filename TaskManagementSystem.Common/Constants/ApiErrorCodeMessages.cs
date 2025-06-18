@@ -31,6 +31,7 @@ namespace TaskManagementSystem.Common.Constants
         public const string TaskAddedSuccessfully = "Task added successfully.";
         public const string TaskUpdatedSuccessfully = "Task updated successfully.";
         public const string TaskNotFound = "Task not found.";
+        public const string TaskDeletedSuccessfully = "Task deleted successfully.";
         #endregion
     }
 }

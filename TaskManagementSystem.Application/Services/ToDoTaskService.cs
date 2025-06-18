@@ -214,21 +214,7 @@ namespace TaskManagementSystem.Application.Services
             return groupedTasks;
         }
 
-
-
-        //public async Task<UserCompletedTaskCountRespDto> GetCompletedTaskCountByUserAsync(int userId)
-        //{    
-        //    var user = await _userRepository.GetByIdAsync(userId) ?? throw new AppException(ApiErrorCodeMessages.UserNotFound);
-        //    var tasks = await _toDoTaskRepository.GetAll()
-        //        .Where(task => task.IsCompleted && task.UserId == userId)  
-        //        .ToListAsync();          
-
-
-        //    var completedTaskCounts = new UserCompletedTaskCountRespDto { UserId = userId, CompletedTaskCount= tasks.Count};
-
-        //    return completedTaskCounts;
-        //}
-
+      
 
 
         public async Task<List<AddTaskResponseDto>> GetTasksDueThisWeekAsync()
@@ -261,7 +247,19 @@ namespace TaskManagementSystem.Application.Services
 
             return taskCounts;
         }
-
+        public async Task<AddTaskRequestDto> GetTaskByIdAsync(int taskId)
+        {
+            var task = await _toDoTaskRepository.GetByIdAsync(taskId) ?? throw new AppException(ApiErrorCodeMessages.TaskNotFound);
+            var taskDto = _mapper.Map<AddTaskRequestDto>(task);
+            return taskDto;
+        }
+        //delete by taskId
+        public async Task<string> DeleteTaskAsync(int taskId)
+        {
+            var task = await _toDoTaskRepository.GetByIdAsync(taskId) ?? throw new AppException(ApiErrorCodeMessages.TaskNotFound);
+            await _toDoTaskRepository.DeleteAsync(taskId);
+            return ApiErrorCodeMessages.TaskDeletedSuccessfully;
+        }
 
 
     }

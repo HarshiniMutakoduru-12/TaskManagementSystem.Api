@@ -24,6 +24,10 @@ namespace TaskManagementSystem.Application.IServices
         Task<UserCompletedTaskCountRespDto> GetTaskCountsAsync();
         Task<string> UpdateTaskAsync(int taskId, UpdateTaskRequestDto taskRequest);
 
+        Task<AddTaskRequestDto> GetTaskByIdAsync(int taskId);
+        Task<string> DeleteTaskAsync(int taskId);
+
+
 
 
     }

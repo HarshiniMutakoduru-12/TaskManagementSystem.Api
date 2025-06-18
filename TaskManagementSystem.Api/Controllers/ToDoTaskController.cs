@@ -32,9 +32,9 @@ namespace TaskManagementSystem.Api.Controllers
         [Route("SearchTasks")]
         [SwaggerResponse(StatusCodes.Status200OK, type: typeof(GenericResponses<List<TaskPaginatedRespDto>>))]
         public async Task<IActionResult> SearchTasks([FromBody] TaskFilterRequestDto filter)
-        {           
+        {
             var tasks = await _toDoTaskService.GetAllTasksAsync(filter);
-           
+
             return Ok(new GenericResponses<List<TaskPaginatedRespDto>>().SuccessResponse(tasks));
         }
         [HttpGet]
@@ -105,6 +105,22 @@ namespace TaskManagementSystem.Api.Controllers
         public async Task<IActionResult> UpdateTask(int taskId, [FromBody] UpdateTaskRequestDto taskRequest)
         {
             var result = await _toDoTaskService.UpdateTaskAsync(taskId, taskRequest);
+            return Ok(new GenericResponses<string>().SuccessResponse(result));
+        }
+        [HttpGet]
+        [Route("GetTaskById/{taskId}")]
+        [SwaggerResponse(StatusCodes.Status200OK, type: typeof(GenericResponses<AddTaskRequestDto>))]
+        public async Task<IActionResult> GetTaskById(int taskId)
+        {
+            var task = await _toDoTaskService.GetTaskByIdAsync(taskId);
+            return Ok(new GenericResponses<AddTaskRequestDto>().SuccessResponse(task));
+        }
+        [HttpDelete]
+        [Route("DeleteTask/{taskId}")]
+        [SwaggerResponse(StatusCodes.Status200OK, type: typeof(GenericResponses<string>))]
+        public async Task<IActionResult> DeleteTask(int taskId)
+        {
+            var result = await _toDoTaskService.DeleteTaskAsync(taskId);
             return Ok(new GenericResponses<string>().SuccessResponse(result));
         }
     }
