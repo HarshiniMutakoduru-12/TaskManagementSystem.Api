@@ -24,7 +24,7 @@ namespace TaskManagementSystem.Api.Controllers
         [SwaggerResponse(StatusCodes.Status200OK, type: typeof(GenericResponses<string>))]
 
         public async Task<IActionResult> AddTask([FromBody] AddTaskRequestDto toDoTask)
-        {            
+        {
             var result = await _toDoTaskService.AddTaskAsync(toDoTask);
             return Ok(new GenericResponses<string>().SuccessResponse(result));
         }
@@ -36,21 +36,21 @@ namespace TaskManagementSystem.Api.Controllers
             var tasks = await _toDoTaskService.GetAllTasksAsync();
             return Ok(new GenericResponses<List<AddTaskResponseDto>>().SuccessResponse(tasks));
         }
-        [HttpGet]        
+        [HttpGet]
         [Route("GetTasksAssignedToUser/{userId}")]
         [SwaggerResponse(StatusCodes.Status200OK, type: typeof(GenericResponses<TaskAssignedToUserResponseDto>))]
 
         public async Task<IActionResult> GetTasksAssignedToUser(int userId)
-        {           
+        {
             var tasks = await _toDoTaskService.GetTasksAssignedToUserAsync(userId);
             return Ok(new GenericResponses<TaskAssignedToUserResponseDto>().SuccessResponse(tasks));
-        }       
+        }
         [HttpGet]
         [Route("GetOverdueOrIncompleteTasks")]
         [SwaggerResponse(StatusCodes.Status200OK, type: typeof(GenericResponses<List<TaskAssignedToUserResponseDto>>))]
         public async Task<IActionResult> GetOverdueOrIncompleteTasks()
         {
-           
+
             var tasks = await _toDoTaskService.GetOverdueOrIncompleteTasksAsync();
             return Ok(new GenericResponses<List<TaskAssignedToUserResponseDto>>().SuccessResponse(tasks));
         }
@@ -60,19 +60,27 @@ namespace TaskManagementSystem.Api.Controllers
         [Route("GetCompletedTaskCountByUser/{userId}")]
         [SwaggerResponse(StatusCodes.Status200OK, type: typeof(GenericResponses<UserCompletedTaskCountRespDto>))]
         public async Task<IActionResult> GetCompletedTaskCountByUser(int userId)
-        {           
+        {
             var count = await _toDoTaskService.GetCompletedTaskCountByUserAsync(userId);
             return Ok(new GenericResponses<UserCompletedTaskCountRespDto>().SuccessResponse(count));
         }
 
         [HttpGet]
-        
+
         [Route("GetTasksDueThisWeek")]
         [SwaggerResponse(StatusCodes.Status200OK, type: typeof(GenericResponses<List<AddTaskResponseDto>>))]
         public async Task<IActionResult> GetTasksDueThisWeek()
         {
             var tasks = await _toDoTaskService.GetTasksDueThisWeekAsync();
             return Ok(new GenericResponses<List<AddTaskResponseDto>>().SuccessResponse(tasks));
+        }
+        [HttpGet]
+        [Route("GetTaskByProjectId/{projectId}")]
+        [SwaggerResponse(StatusCodes.Status200OK, type: typeof(GenericResponses<GetTaskByProjectIdResponse>))]
+        public async Task<IActionResult> GetTaskByProjectId(int projectId)
+        {
+            var tasks = await _toDoTaskService.GetTaskByProjectIdAsync(projectId);
+            return Ok(new GenericResponses<GetTaskByProjectIdResponse>().SuccessResponse(tasks));
         }
     }
 }

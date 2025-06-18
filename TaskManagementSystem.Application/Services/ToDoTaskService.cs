@@ -20,11 +20,13 @@ namespace TaskManagementSystem.Application.Services
         IMapper _mapper;
         IToDoTaskRepository _toDoTaskRepository;
         IUserRepository _userRepository;
-        public ToDoTaskService(IToDoTaskRepository toDoTaskRepository,IMapper mapper, IUserRepository userRepository)
+        IProjectRepository _projectRepository;
+        public ToDoTaskService(IToDoTaskRepository toDoTaskRepository,IMapper mapper, IUserRepository userRepository, IProjectRepository projectRepository)
         {
             _mapper = mapper;
             _toDoTaskRepository = toDoTaskRepository;
             _userRepository = userRepository;
+            _projectRepository = projectRepository;
         }
 
         // Add ToDo Task
@@ -52,6 +54,22 @@ namespace TaskManagementSystem.Application.Services
             var tasks = await _toDoTaskRepository.GetAll().ToListAsync();
             return _mapper.Map<List<AddTaskResponseDto>>(tasks);
         }
+
+        public async Task<GetTaskByProjectIdResponse> GetTaskByProjectIdAsync(int projectId)
+        {
+            var project = await _projectRepository.GetByIdAsync(projectId) ?? throw new AppException(ApiErrorCodeMessages.ProjectNotFound);
+            var tasks = await _toDoTaskRepository.GetAll()
+                .Where(task => task.ProjectId == projectId)
+                .ToListAsync();
+            var tasksResponse = new GetTaskByProjectIdResponse
+            {
+                ProjectId = projectId,
+                Tasks = _mapper.Map<List<AddTaskResponseDto>>(tasks)
+            };
+           return tasksResponse;
+        }
+
+
         public async Task<TaskAssignedToUserResponseDto> GetTasksAssignedToUserAsync(int userId)
         {
 
