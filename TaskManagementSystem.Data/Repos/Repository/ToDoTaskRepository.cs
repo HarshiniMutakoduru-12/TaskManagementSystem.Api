@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TaskManagementSystem.Common.DTOs.RequestDTO;
 using TaskManagementSystem.Common.DTOs.ResponseDTO;
 using TaskManagementSystem.Data.Database;
 using TaskManagementSystem.Data.Models;
@@ -27,15 +28,13 @@ namespace TaskManagementSystem.Data.Repos.Repository
         {
             var currentDate = DateTime.Now; // Get the current date in UTC
             DateTime startOfWeek = currentDate.AddDays(-(int)currentDate.DayOfWeek + (int)DayOfWeek.Monday);
-
-            // Get the end of the current week (Sunday)
+            
             DateTime endOfWeek = startOfWeek.AddDays(6);  // Sunday is 6 days after Monday
             var query = @"
                 SELECT * 
-        FROM ToDoTasks
-      WHERE cast(DueDate as date) >= @StartOfWeek  AND cast(DueDate as date) <= @EndOfWeek  and isCompleted = 0";
-
-            // Execute the raw SQL query using FromSqlRaw with parameters
+                FROM ToDoTasks
+                WHERE cast(DueDate as date) >= @StartOfWeek  AND cast(DueDate as date) <= @EndOfWeek  and isCompleted = 0";
+            
             var tasks =await _context.ToDoTasks.FromSqlRaw(query, new SqlParameter("@StartOfWeek", startOfWeek), new SqlParameter("@EndOfWeek", endOfWeek)).ToListAsync();
 
             return tasks;
