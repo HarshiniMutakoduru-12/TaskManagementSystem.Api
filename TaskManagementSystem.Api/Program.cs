@@ -327,12 +327,24 @@ void SeedData(ApplicationDbContext context)
                 Description = "Design the page for listing products.",
                 DueDate = DateTime.UtcNow.AddDays(-3),
                 Priority = "Medium",
-                IsCompleted = true,
+                IsCompleted = false,
                 UserId = 4,
                 CreatedOn = DateTime.UtcNow,
                 CreatedBy = "1",
                 ProjectId = 3
-            }
+            },
+             new ToDoTask
+             {
+                 Title = "testTask",
+                 Description = "Design the page for listing products.",
+                 DueDate = DateTime.UtcNow.AddDays(-3),
+                 Priority = "Medium",
+                 IsCompleted = false,
+                 UserId = 4,
+                 CreatedOn = DateTime.UtcNow,
+                 CreatedBy = "1",
+                 ProjectId = 3
+             }
         );
         context.SaveChanges();
     }
