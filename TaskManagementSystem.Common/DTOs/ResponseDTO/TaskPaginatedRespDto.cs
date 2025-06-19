@@ -10,5 +10,7 @@ namespace TaskManagementSystem.Common.DTOs.ResponseDTO
     {
         public int TotalCount { get; set; }
         public int RowNumber { get; set; }
+        public string ProjectName { get; set; }
+        public string UserName { get; set; }
     }
 }

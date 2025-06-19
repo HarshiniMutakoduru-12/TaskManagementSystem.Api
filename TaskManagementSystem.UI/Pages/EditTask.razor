@@ -1,0 +1,203 @@
+﻿@page "/create"
+@page "/edit/{TaskId:int}"
+@page "/view/{TaskId:int}"
+@using MudBlazor
+
+@using TaskManagementSystem.UI.Models
+@using TaskManagementSystem.UI.Services
+@inject ITaskService TaskService
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
+@inject IUserService UserService
+@inject IProjectService ProjectService
+
+<MudPaper Class="pa-6 mx-auto mt-6" Elevation="1" MaxWidth="800px">
+    <MudText Typo="Typo.h5" Class="mb-4">
+        @(IsViewMode ? "View Task" : TaskId.HasValue ? "Edit Task" : "Create Task")
+    </MudText>
+
+    <EditForm @ref="_form" Model="_model" OnValidSubmit="OnValidSubmit">
+        <DataAnnotationsValidator />
+        <MudGrid GutterSize="3">
+            <MudItem xs="12" sm="6">
+                <MudTextField T="string" For="@(() => _model.Title)" Label="Title" @bind-Value="_model.Title" ReadOnly="IsViewMode" />
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudTextField T="string" For="@(() => _model.Description)" Label="Description" @bind-Value="_model.Description" ReadOnly="IsViewMode" />
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudDatePicker Label="Due Date" For="@(() => _model.DueDate)" @bind-Date="_model.DueDate" ReadOnly="IsViewMode" />
+            </MudItem>
+
+            @if (IsViewMode)
+            {
+                <MudItem xs="12" sm="6">
+                    <MudText Typo="Typo.subtitle2" Class="mb-1">Priority</MudText>
+                    <MudChip T="string" Color="@GetPriorityColor(_model.Priority)">
+                        @_model.Priority
+                    </MudChip>
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudText Typo="Typo.subtitle2" Class="mb-1">Status</MudText>
+                    <MudChip T="string" Color="@GetStatusColor(_model.IsCompleted ? "Completed" : "In Progress")">
+                        @(_model.IsCompleted ? "Completed" : "In Progress")
+                    </MudChip>
+                </MudItem>
+            }
+
+            else
+            {
+                <MudItem xs="12" sm="6">
+                    <MudSelect For="@(() => _model.Priority)" T="string" Label="Priority" @bind-Value="_model.Priority" ReadOnly="IsViewMode">
+                        @foreach (var option in PriorityOptions)
+                        {
+                            <MudSelectItem Value="@option">@option</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudCheckBox For="@(() => _model.IsCompleted)" T="bool" Label="Is Completed" @bind-Checked="_model.IsCompleted" />
+                </MudItem>
+            }
+            <MudItem xs="12" sm="6">
+
+                <MudSelect @bind-Value="_model.UserId" For="@(() => _model.UserId)"
+                           Variant="Variant.Text"
+                           Label="User" T="int?" ReadOnly="IsViewMode">
+                    @foreach (var user in users)
+                    {
+                        <MudSelectItem T="int?" Value="@user.UserId">@user.Name</MudSelectItem>
+                    }
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="12" sm="6">
+
+                <MudSelect @bind-Value="_model.ProjectId" For="@(() => _model.ProjectId)"
+                           Variant="Variant.Text"
+                           Label="Project" T="int?" ReadOnly="IsViewMode">
+                    @foreach (var project in projects)
+                    {
+                        <MudSelectItem T="int?" Value="@project.ProjectId">@project.Name</MudSelectItem>
+                    }
+                </MudSelect>
+            </MudItem>
+
+
+        </MudGrid>
+
+        @if (!IsViewMode)
+        {
+            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="mt-4">Save</MudButton>
+        }
+    </EditForm>
+    @* <TaskCard IsViewMode="IsViewMode" _modal="_model"/> *@
+
+</MudPaper>
+
+@code {
+    [Parameter] public int? TaskId { get; set; }
+
+    private List<TaskManagementSystem.Common.DTOs.ResponseDTO.AddUserResponseDto> users = [];
+    private List<TaskManagementSystem.Common.DTOs.ResponseDTO.AddProjectResponseDto> projects = [];
+    private TaskModal _model = new();
+    private EditForm _form;
+
+    private bool IsViewMode => Navigation.Uri.Contains("/view");
+
+    private List<string> PriorityOptions = new() { "Low", "Medium", "High" };
+
+    protected async override Task OnParametersSetAsync()
+    {
+        if (TaskId.HasValue)
+        {
+            var task = await TaskService.GetTaskByIdAsync(TaskId.Value);
+            if (task != null)
+            {
+                _model = new TaskModal
+                {
+                    Title = task.Title,
+                    Description = task.Description,
+                    DueDate = task.DueDate,
+                    IsCompleted = task.IsCompleted,
+                    Priority = task.Priority,
+                    UserId = task.UserId,
+                    ProjectId = task.ProjectId
+                };
+
+            }
+        }
+        else
+        {
+            _model = new TaskModal();
+        }
+        users = await UserService.GetAllUsers();
+        projects = await ProjectService.GetAllProjects();
+        StateHasChanged();
+
+    }
+
+
+
+    private async Task OnValidSubmit(EditContext context)
+    {
+        Console.WriteLine("OnValidSubmit triggered");
+        if (IsViewMode)
+            return;
+
+        var response = string.Empty;
+
+        if (TaskId.HasValue)
+        {
+            var request = new UpdateTaskRequestDto
+            {
+                Title = _model.Title,
+                Description = _model.Description,
+                DueDate = _model.DueDate.Value,
+                IsCompleted = _model.IsCompleted,
+                Priority = _model.Priority,
+                UserId = _model.UserId,
+                ProjectId = _model.ProjectId
+            };
+
+            response = await TaskService.UpdateTaskAsync(TaskId.Value, request);
+        }
+        else
+        {
+            var request = new AddTaskRequestDto
+            {
+                Title = _model.Title,
+                Description = _model.Description,
+                DueDate = _model.DueDate.Value,
+                IsCompleted = _model.IsCompleted,
+                Priority = _model.Priority,
+                UserId = _model.UserId.Value,
+                ProjectId = _model.ProjectId
+            };
+            response = await TaskService.AddTaskAsync(request);
+        }
+        if (response == null)
+            Snackbar.Add("Error Updating Task", Severity.Error);
+        else
+        {
+            Snackbar.Add(response, Severity.Success);
+            Navigation.NavigateTo("/tasks");
+        }
+    }
+
+    private Color GetStatusColor(string status) => status switch
+    {
+        "Created" => Color.Info,
+        "InProgress" => Color.Warning,
+        "Completed" => Color.Success,
+        _ => Color.Default
+    };
+
+    private Color GetPriorityColor(string priority) => priority switch
+    {
+        "Low" => Color.Success,
+        "Medium" => Color.Warning,
+        "High" => Color.Error,
+        _ => Color.Default
+    };
+
+}

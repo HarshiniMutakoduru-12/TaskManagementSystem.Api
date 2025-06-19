@@ -5,6 +5,8 @@
 @inject NavigationManager NavigationManager
 @inject ITaskService TaskService
 @layout MainLayout
+@inject IUserService UserService
+@inject IProjectService ProjectService
 
 <MudContainer>
     <MudToolBar Class="mb-4">
@@ -26,90 +28,140 @@
                 <div class="col-3">
                     <MudTextField Label="Title" @bind-Value="filter.TitleFilter" Placeholder="Search Title" />
                 </div>
+
+                @* <div class="col-3">
+                    <MudDatePicker Label="Due Date" @bind-Date="filter.DueDateFilter" />
+                </div> *@
+                <div class="col-2">
+                    @* <MudTextField Label="Project" @bind-Value="filter.ProjectId" Placeholder="Search Title" /> *@
+                    <MudSelect @bind-Value="filter.UserId"
+                               Variant="Variant.Text"
+                               Label="User" T="int?">
+                        @foreach (var user in users)
+                        {
+                            <MudSelectItem T="int?" Value="@user.UserId">@user.Name</MudSelectItem>
+                        }
+                    </MudSelect>
+                </div>
                 <div class="col-3">
+                    <MudSelect @bind-Value="filter.ProjectId"
+                               Variant="Variant.Text"
+                               Label="Project" T="int?">
+                        @foreach (var project in projects)
+                        {
+                            <MudSelectItem T="int?" Value="@project.ProjectId">@project.Name</MudSelectItem>
+                        }
+                    </MudSelect>
+                </div>
+                <div class="col-2">
                     <MudSelect T="bool?" Label="Status" @bind-Value="filter.IsCompleted">
                         <MudSelectItem T="bool?" Value="@(null)">All</MudSelectItem>
                         <MudSelectItem T="bool?" Value="false">In Progress</MudSelectItem>
                         <MudSelectItem T="bool?" Value="true">Completed</MudSelectItem>
                     </MudSelect>
                 </div>
-                <div class="col-3">
-                    <MudDatePicker Label="Due Date" @bind-Date="filter.DueDateFilter" />
-                </div>
-                <div class="col-3 d-flex align-items-end">
-                    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="ApplyFilter">Apply</MudButton>
-                    <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="ClearFilter" Class="ms-2">Clear</MudButton>
-                </div>
+                @* <div>
+                    <MudTextField Label="User" @bind-Value="filter.UserId" Placeholder="Search Title" />
+                </div> *@
+            <div class=" col-2 d-flex align-items-center justify-content-end">
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="ApplyFilter">Apply</MudButton>
+                <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="ClearFilter" Class="ms-2">Clear</MudButton>
+            </div>
             </div>
         </MudCollapse>
     </MudStack>
 
-    @if (tasks.Any())
-    {
-        <MudTable Items="@tasks" Hover="true" Class="mt-4">
-            <HeaderContent>
-                <MudTh>@nameof(AddTaskResponseDto.Title)</MudTh>
-                <MudTh>Status</MudTh>
-                <MudTh>@nameof(AddTaskResponseDto.Priority)</MudTh>
-                <MudTh>@nameof(AddTaskResponseDto.DueDate)</MudTh>
-                <MudTh>@nameof(AddTaskResponseDto.Description)</MudTh>
-                <MudTh>Actions</MudTh>
-            </HeaderContent>
-            <RowTemplate>
-                <MudTd>@context.Title</MudTd>
-                <MudTd>
-                    <MudChip T="string" Color="@GetStatusColor(@context.IsCompleted ? "Completed" : "In Progress")">
-                        @(context.IsCompleted ? "Completed" : "In Progress")
-                    </MudChip>
-                </MudTd>
-                <MudTd>
-                    <MudChip T="string" Color="@GetPriorityColor(@context.Priority)">
-                        @context.Priority
-                    </MudChip>
-                </MudTd>
-                <MudTd>@context.DueDate.ToShortDateString()</MudTd>
-                <MudTd>@context.Description</MudTd>
-                <MudTd>
-                    <MudIconButton Icon="@Icons.Material.Outlined.Edit" Color="Color.Default" @onclick="@(() => EditTask(context.TaskId))" />
-                    <MudIconButton Icon="@Icons.Material.Outlined.RemoveRedEye" Color="Color.Success" @onclick="@(() => ViewTask(context.TaskId))" />
-                </MudTd>
-            </RowTemplate>
-        </MudTable>
-    }
-    else
-    {
-        <MudAlert Severity="Severity.Info" Class="mt-4">No tasks found.</MudAlert>
-    }
+
+    <MudTable @ref="table" ServerData="ServerReload" Style="height:100%" Height="80%" Hover="true" Class="mt-4" FixedFooter="true" FixedHeader="true" Dense="true">
+        <HeaderContent>
+            <MudTh>S.No</MudTh>
+            <MudTh>@nameof(AddTaskResponseDto.Title)</MudTh>
+            <MudTh>Status</MudTh>
+            <MudTh>@nameof(AddTaskResponseDto.Priority)</MudTh>
+            <MudTh>@nameof(AddTaskResponseDto.DueDate)</MudTh>
+            <MudTh>@nameof(AddTaskResponseDto.Description)</MudTh>
+            <MudTh>@nameof(AddTaskResponseDto.ProjectName)</MudTh>
+            <MudTh>@nameof(AddTaskResponseDto.UserName)</MudTh>
+
+
+            <MudTh>Actions</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd>@context.RowNumber</MudTd>
+            <MudTd>@context.Title</MudTd>
+            <MudTd>
+                <MudChip T="string" Color="@GetStatusColor(@context.IsCompleted ? "Completed" : "In Progress")">
+                    @(context.IsCompleted ? "Completed" : "In Progress")
+                </MudChip>
+            </MudTd>
+            <MudTd>
+                <MudChip T="string" Color="@GetPriorityColor(@context.Priority)">
+                    @context.Priority
+                </MudChip>
+            </MudTd>
+            <MudTd>@context.DueDate.ToShortDateString()</MudTd>
+            <MudTd>@context.Description</MudTd>
+            <MudTd>@context.ProjectName</MudTd>
+            <MudTd>@context.UserName</MudTd>
+
+            <MudTd Class="d-flex justify-content-center align-items-center">
+                <MudIconButton Icon="@Icons.Material.Outlined.Edit" Color="Color.Default" @onclick="@(() => EditTask(context.TaskId))" />
+                <MudIconButton Icon="@Icons.Material.Outlined.RemoveRedEye" Color="Color.Success" @onclick="@(() => ViewTask(context.TaskId))" />
+            </MudTd>
+        </RowTemplate>
+        <NoRecordsContent>
+            <MudText>No matching records found</MudText>
+        </NoRecordsContent>
+        <LoadingContent>
+            <MudText>Loading...</MudText>
+        </LoadingContent>
+        <PagerContent>
+            <MudTablePager Class="bg-light" />
+        </PagerContent>
+    </MudTable>
+
 </MudContainer>
 
 @code {
-    private List<AddTaskResponseDto> tasks = [];
+    private MudTable<AddTaskResponseDto> table;
     private bool showFilter = false;
-
+    private List<TaskManagementSystem.Common.DTOs.ResponseDTO.AddUserResponseDto> users = [];
+    private List<TaskManagementSystem.Common.DTOs.ResponseDTO.AddProjectResponseDto> projects = [];
     private TaskFilterRequestDto filter = new()
     {
         CurrentPage = 1,
         PageSize = 10,
-        SortColumn = "TaskId",
-        IsAscending = true
+
     };
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadTasks();
+        users = await GetAllUsers();
+        projects = await GetAllProjects();
+        //await LoadTasks();
     }
 
-    private async Task LoadTasks()
+    // private async Task LoadTasks()
+    // {
+    //     var response = await TaskService.SearchTasksAsync(filter);
+    //     tasks = response?.Response ?? [];
+    // }
+    private async Task<List<TaskManagementSystem.Common.DTOs.ResponseDTO.AddUserResponseDto>> GetAllUsers()
     {
-        var response = await TaskService.SearchTasksAsync(filter);
-        tasks = response?.Response ?? [];
+        var result = await UserService.GetAllUsers();
+        return result;
+    }
+    private async Task<List<TaskManagementSystem.Common.DTOs.ResponseDTO.AddProjectResponseDto>> GetAllProjects()
+    {
+        var result = await ProjectService.GetAllProjects();
+        return result;
     }
 
     private async Task ApplyFilter()
     {
         filter.CurrentPage = 1;
-        await LoadTasks();
-        showFilter = false;
+        await table.ReloadServerData();
+        //showFilter = false;
     }
 
     private async Task ClearFilter()
@@ -118,10 +170,9 @@
         {
             CurrentPage = 1,
             PageSize = 10,
-            SortColumn = "TaskId",
-            IsAscending = true
+
         };
-        await LoadTasks();
+        await table.ReloadServerData();
     }
 
     private void ToggleFilter() => showFilter = !showFilter;
@@ -147,4 +198,26 @@
         "High" => Color.Error,
         _ => Color.Default
     };
+    private async Task<TableData<AddTaskResponseDto>> ServerReload(TableState state, CancellationToken token)
+    {
+        try
+        {
+            
+            filter.PageSize = state.PageSize;
+            filter.CurrentPage = state.Page + 1;
+
+            GenericResponses<List<AddTaskResponseDto>> data = await TaskService.SearchTasksAsync(filter);
+
+            var totalItems = data?.Response?.FirstOrDefault()?.TotalCount ?? 0;
+            return new TableData<AddTaskResponseDto>() { TotalItems = totalItems, Items = data?.Response ?? [] };
+        }
+        catch (Exception ex)
+        {
+            if (ex is ApplicationException)
+                Snackbar.Add(ex.Message, Severity.Warning);
+            else
+                Snackbar.Add(ex.Message, Severity.Error);
+            return new TableData<AddTaskResponseDto>();
+        }
+    }
 }
